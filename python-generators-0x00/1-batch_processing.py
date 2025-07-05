@@ -1,39 +1,18 @@
-import mysql.connector
-from mysql.connector import Error
+#!/usr/bin/env python3
+import json
 
-def stream_users_in_batches(batch_size=1000):
-    """Generator that yields batches of users from the database"""
-    connection = None
-    cursor = None
-    
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='ALX_prodev'
-        )
-        
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM user_data")
-        
-        while True:
-            batch = cursor.fetchmany(batch_size)
-            if not batch:
-                break
-            yield batch
-            
-    except Error as e:
-        print(f"Database error: {e}")
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+def stream_users_in_batches(batch_size):
+    """Generator that yields users in batches from the database file."""
+    with open("user_data.json", "r") as f:
+        users = json.load(f)
 
-def batch_processing(batch_size=1000):
-    """Process batches of users, filtering those over 25 years old"""
+    total_users = len(users)
+    for i in range(0, total_users, batch_size):
+        yield users[i:i + batch_size]
+
+def batch_processing(batch_size):
+    """Processes each batch to print users over the age of 25."""
     for batch in stream_users_in_batches(batch_size):
         for user in batch:
-            if user['age'] > 25:
-                yield user
+            if user.get('age', 0) > 25:
+                print(user)
