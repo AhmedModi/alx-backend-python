@@ -1,27 +1,20 @@
 #!/usr/bin/env python3
-"""Unit test for GithubOrgClient.org"""
+"""Unit tests for utils.py"""
 
 import unittest
-from unittest.mock import patch
-from parameterized import parameterized
-from client import GithubOrgClient
+from utils import access_nested_map
 
 
-class TestGithubOrgClient(unittest.TestCase):
-    """Unit tests for GithubOrgClient"""
+class TestAccessNestedMap(unittest.TestCase):
+    """Test cases for access_nested_map"""
 
-    @parameterized.expand([
-        ("google",),
-        ("abc",)
-    ])
-    @patch('client.get_json')
-    def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns the correct value."""
-        test_payload = {"login": org_name}
-        mock_get_json.return_value = test_payload
+    def test_access_nested_map(self):
+        self.assertEqual(access_nested_map({"a": 1}, ("a",)), 1)
+        self.assertEqual(access_nested_map({"a": {"b": 2}}, ("a",)), {"b": 2})
+        self.assertEqual(access_nested_map({"a": {"b": 2}}, ("a", "b")), 2)
 
-        client = GithubOrgClient(org_name)
-        result = client.org
-
-        self.assertEqual(result, test_payload)
-        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
+    def test_access_nested_map_exception(self):
+        with self.assertRaises(KeyError):
+            access_nested_map({}, ("a",))
+        with self.assertRaises(KeyError):
+            access_nested_map({"a": 1}, ("a", "b"))
