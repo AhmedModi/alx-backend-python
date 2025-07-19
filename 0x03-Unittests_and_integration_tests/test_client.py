@@ -6,6 +6,7 @@ from unittest.mock import patch, MagicMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
 
+
 @parameterized_class([
     {
         "org_payload": {"repos_url": "https://api.github.com/orgs/testorg/repos"},
@@ -22,10 +23,10 @@ class TestGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('client.requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Mock org() response
+        # Mock responses for org and public_repos
         cls.mock_get.return_value.json.side_effect = [
-            cls.org_payload,  # response for org
-            cls.repos_payload  # response for public_repos
+            cls.org_payload,
+            cls.repos_payload
         ]
 
     @classmethod
