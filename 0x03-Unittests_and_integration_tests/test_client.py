@@ -2,7 +2,7 @@
 """Integration test for GithubOrgClient"""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from parameterized import parameterized_class
 from client import GithubOrgClient
 
@@ -10,33 +10,40 @@ from client import GithubOrgClient
 @parameterized_class([
     {
         "org_payload": {"repos_url": "https://api.github.com/orgs/testorg/repos"},
-        "repos_payload": [{"name": "repo1"}, {"name": "repo2"}],
+        "repos_payload": [
+            {"name": "repo1"},
+            {"name": "repo2"}
+        ],
         "expected_repos": ["repo1", "repo2"],
         "org": "testorg"
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration Test class for GithubOrgClient"""
+    """Integration tests for the GithubOrgClient class"""
 
     @classmethod
     def setUpClass(cls):
-        """Start patcher for requests.get"""
+        """Set up mock for requests.get"""
         cls.get_patcher = patch('client.requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Mock org and repos responses
-        cls.mock_get.return_value.json.side_effect = [
-            cls.org_payload,
-            cls.repos_payload
-        ]
+        # Mock response instances
+        org_response = MagicMock()
+        org_response.json.return_value = cls.org_payload
+
+        repos_response = MagicMock()
+        repos_response.json.return_value = cls.repos_payload
+
+        # Side effects: first call returns org_payload, second call returns repos_payload
+        cls.mock_get.side_effect = [org_response, repos_response]
 
     @classmethod
     def tearDownClass(cls):
-        """Stop patcher for requests.get"""
+        """Tear down patcher"""
         cls.get_patcher.stop()
 
     def test_public_repos_integration(self):
-        """Test public_repos method"""
+        """Test that public_repos returns the expected list of repo names"""
         client = GithubOrgClient(self.org)
         self.assertEqual(client.public_repos(), self.expected_repos)
 
