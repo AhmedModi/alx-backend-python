@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Utils module for helper functions."""
-
-import requests
+"""utils module with access_nested_map function"""
 
 
-def get_json(url):
-    """Makes a GET request to the URL and returns the JSON content."""
-    response = requests.get(url)
-    return response.json()
+def access_nested_map(nested_map, path):
+    """Access a nested map with a sequence of keys"""
+    for key in path:
+        nested_map = nested_map[key]
+    return nested_map
