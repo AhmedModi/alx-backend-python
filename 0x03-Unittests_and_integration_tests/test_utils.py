@@ -1,13 +1,15 @@
+"""Unit test for access_nested_map"""
 import unittest
+from parameterized import parameterized
 from unittest.mock import patch
-from utils import memoize
+from utils import access_nested_map, memoize
 
 
 class TestMemoize(unittest.TestCase):
     """Tests for the memoize decorator."""
 
     def test_memoize(self):
-        """Ensure a_method is called only once due to memoization."""
+        """Ensure the method is only called once due to memoization."""
 
         class TestClass:
             def a_method(self):
@@ -20,7 +22,10 @@ class TestMemoize(unittest.TestCase):
         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
             obj = TestClass()
 
+            # First call (should call a_method)
             result1 = obj.a_property
+
+            # Second call (should NOT call a_method again)
             result2 = obj.a_property
 
             self.assertEqual(result1, 42)
