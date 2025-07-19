@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
-"""Test client.GithubOrgClient."""
+"""Test client.GithubOrgClient._public_repos_url."""
 import unittest
-from parameterized import parameterized
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test GithubOrgClient.org method."""
+    """Test GithubOrgClient._public_repos_url."""
 
-    @parameterized.expand([
-        ("google", {"payload": True}),
-        ("abc", {"payload": False}),
-    ])
-    @patch('client.get_json')
-    def test_org(self, org_name, expected_payload, mock_get_json):
-        """Test that GithubOrgClient.org returns the correct payload."""
-        # Set up the mock return value
-        mock_get_json.return_value = expected_payload
+    def test_public_repos_url(self):
+        """Test that _public_repos_url returns the correct URL."""
+        # Define the test payload
+        test_payload = {
+            "repos_url": "https://api.github.com/orgs/google/repos"
+        }
 
-        # Call the method
-        client = GithubOrgClient(org_name)
-        result = client.org
+        # Patch GithubOrgClient.org to return the test payload
+        with patch(
+            'client.GithubOrgClient.org',
+            new_callable=PropertyMock,
+            return_value=test_payload
+        ) as mock_org:
+            # Create an instance of GithubOrgClient
+            client = GithubOrgClient("google")
+            # Call _public_repos_url
+            result = client._public_repos_url
 
-        # Assert the mock was called correctly
-        mock_get_json.assert_called_once_with(
-            f"https://api.github.com/orgs/{org_name}"
-        )
-        # Assert the result matches the expected payload
-        self.assertEqual(result, expected_payload)
+            # Assert that org was accessed (since it's a property)
+            mock_org.assert_called_once()
+            # Assert that the result matches the expected URL
+            self.assertEqual(result, test_payload["repos_url"])
