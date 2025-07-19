@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-"""Unit tests for GithubOrgClient"""
+"""Integration test for GithubOrgClient"""
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from parameterized import parameterized_class
 from client import GithubOrgClient
 
 
 @parameterized_class([
-    {"org_payload": {"repos_url": "https://api.github.com/orgs/testorg/repos"},
-     "repos_payload": [{"name": "repo1"}, {"name": "repo2"}],
-     "expected_repos": ["repo1", "repo2"],
-     "org": "testorg"}
+    {
+        "org_payload": {"repos_url": "https://api.github.com/orgs/testorg/repos"},
+        "repos_payload": [{"name": "repo1"}, {"name": "repo2"}],
+        "expected_repos": ["repo1", "repo2"],
+        "org": "testorg"
+    }
 ])
-class TestGithubOrgClient(unittest.TestCase):
-    """Test class for GithubOrgClient"""
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration Test class for GithubOrgClient"""
 
     @classmethod
     def setUpClass(cls):
@@ -22,10 +24,10 @@ class TestGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('client.requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Mock org response
+        # Mock org and repos responses
         cls.mock_get.return_value.json.side_effect = [
-            cls.org_payload,       # For org
-            cls.repos_payload      # For repos
+            cls.org_payload,
+            cls.repos_payload
         ]
 
     @classmethod
@@ -33,7 +35,11 @@ class TestGithubOrgClient(unittest.TestCase):
         """Stop patcher for requests.get"""
         cls.get_patcher.stop()
 
-    def test_public_repos(self):
+    def test_public_repos_integration(self):
         """Test public_repos method"""
         client = GithubOrgClient(self.org)
         self.assertEqual(client.public_repos(), self.expected_repos)
+
+
+if __name__ == "__main__":
+    unittest.main()
