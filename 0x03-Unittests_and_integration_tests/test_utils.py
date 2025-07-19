@@ -1,35 +1,23 @@
 #!/usr/bin/env python3
-"""Unit test for access_nested_map."""
-
 import unittest
+from unittest.mock import patch
 from parameterized import parameterized
-from unittest.mock import patch, Mock
-from utils import access_nested_map, memoize
+from client import GithubOrgClient
 
 
-class TestMemoize(unittest.TestCase):
-    """Tests for the memoize decorator."""
+class TestGithubOrgClient(unittest.TestCase):
+    """Tests for GithubOrgClient"""
 
-    def test_memoize(self):
-        """Ensure the method is only called once due to memoization."""
+    @parameterized.expand([
+        ("google",),
+        ("abc",),
+    ])
+    @patch('client.get_json')
+    def test_org(self, org_name, mock_get_json):
+        """Test org property"""
+        expected = {"login": org_name}
+        mock_get_json.return_value = expected
 
-        class TestClass:
-            def a_method(self):
-                return 42
-
-            @memoize
-            def a_property(self):
-                return self.a_method()
-
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            obj = TestClass()
-
-            # First call (should call a_method)
-            result1 = obj.a_property
-
-            # Second call (should NOT call a_method again)
-            result2 = obj.a_property
-
-            self.assertEqual(result1, 42)
-            self.assertEqual(result2, 42)
-            mock_method.assert_called_once()
+        client = GithubOrgClient(org_name)
+        self.assertEqual(client.org, expected)
+        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
