@@ -2,7 +2,9 @@
 """Unit test for access_nested_map"""
 
 import unittest
+from parameterized import parameterized
 from unittest.mock import patch, Mock
+from utils import access_nested_map, memoize
 
 class TestMemoize(unittest.TestCase):
     """Tests for the memoize decorator."""
