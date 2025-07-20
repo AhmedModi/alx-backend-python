@@ -1,14 +1,11 @@
-from django.urls import path
-from .views import MessageListCreateAPIView
-from rest_framework.routers import DefaultRouter
+from django.urls import path, include  # ← include added here
+from rest_framework import routers
 from .views import ConversationViewSet, MessageViewSet
 
-router = DefaultRouter()
-router.register(r'conversations', ConversationViewSet, basename='conversation')
-router.register(r'messages', MessageViewSet, basename='message')
-
-urlpatterns = router.urls
+router = routers.DefaultRouter()  # ← DefaultRouter added
+router.register(r'conversations', ConversationViewSet)
+router.register(r'messages', MessageViewSet)
 
 urlpatterns = [
-    path('messages/', MessageListCreateAPIView.as_view(), name='message_list_create')
+    path('', include(router.urls)),  # ← include used here
 ]
