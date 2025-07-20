@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters  # ← ADD filters here
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -10,9 +10,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter]  # ← ADD this line
+    search_fields = ['participants__username']  # ← Optional: customize fields
 
     def perform_create(self, serializer):
-        # Add the authenticated user as one of the participants
         conversation = serializer.save()
         conversation.participants.add(self.request.user)
 
@@ -20,15 +21,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]  # ← ADD this line
+    ordering_fields = ['timestamp']  # ← Optional
 
     def get_queryset(self):
         return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
         conversation = serializer.validated_data.get('conversation')
-
-        # Only participants can send messages
         if self.request.user not in conversation.participants.all():
             raise serializers.ValidationError("You are not a participant of this conversation.")
-
         serializer.save(sender=self.request.user)
