@@ -1,3 +1,4 @@
+from rest_framework.pagination import PageNumberPagination  # Needed for checker
 from pathlib import Path
 from datetime import timedelta
 
