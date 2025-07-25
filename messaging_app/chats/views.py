@@ -23,12 +23,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrParticipant]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]  # ✅ Changed here
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['timestamp']
 
     def get_queryset(self):
+        # Only messages in conversations the user is part of
         return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
