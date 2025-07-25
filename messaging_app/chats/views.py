@@ -24,7 +24,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsOwnerOrParticipant]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['timestamp']
 
@@ -33,6 +33,8 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         conversation = serializer.validated_data.get('conversation')
+
         if self.request.user not in conversation.participants.all():
-            raise serializers.ValidationError("You are not a participant of this conversation.")
+            raise PermissionDenied(detail="You are not a participant of this conversation.", code=status.HTTP_403_FORBIDDEN)
+
         serializer.save(sender=self.request.user)
