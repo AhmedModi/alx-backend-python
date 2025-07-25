@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsOwnerOrParticipant, IsParticipantOfConversation
@@ -23,10 +23,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all().order_by('-timestamp')
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrParticipant]
-    filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['timestamp']
+    permission_classes = [permissions.IsAuthenticated, IsParticipantOfConversation]
+    pagination_class = MessagePagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         return Message.objects.filter(conversation__participants=self.request.user)
