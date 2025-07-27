@@ -24,7 +24,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Default Django middleware
     'django.middleware.security.SecurityMiddleware',
+    
+    # ✅ Add your custom middleware
+    'chats.middleware.RequestLoggingMiddleware',
+
+    # Rest of Django middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
