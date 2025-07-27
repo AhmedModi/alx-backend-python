@@ -1,9 +1,5 @@
 MIDDLEWARE = [
-    # Default Django middleware
     'django.middleware.security.SecurityMiddleware',
-    
-    # ✅ Add your custom middleware
-    'chats.middleware.RequestLoggingMiddleware',
 
     # ✅ Custom middleware
     'chats.middleware.RequestLoggingMiddleware',
