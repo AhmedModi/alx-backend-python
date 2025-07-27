@@ -30,7 +30,10 @@ MIDDLEWARE = [
     # ✅ Add your custom middleware
     'chats.middleware.RequestLoggingMiddleware',
 
-    # Rest of Django middleware
+    # ✅ Custom middleware
+    'chats.middleware.RequestLoggingMiddleware',
+    'chats.middleware.RestrictAccessByTimeMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
