@@ -14,3 +14,7 @@ def unread_messages_view(request):
         .select_related('sender', 'receiver')
     )
     return render(request, 'messaging/unread_messages.html', {'unread_messages': unread_messages})
+
+def unread_inbox_view(request):
+    unread_messages = Message.unread.unread_for_user(request.user).only('id', 'content', 'timestamp', 'sender')
+    # render or return this data
