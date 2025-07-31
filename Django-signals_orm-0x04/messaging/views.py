@@ -3,9 +3,6 @@ from django.shortcuts import render
 from .models import Message
 
 @login_required
-def sent_messages_view(request):
-    messages = Message.objects.filter(sender=request.user)\
-        .select_related('receiver')\
-        .prefetch_related('replies')
-
-    return render(request, 'messaging/sent_messages.html', {'messages': messages})
+def unread_messages_view(request):
+    unread_messages = Message.unread.for_user(request.user)
+    return render(request, 'messaging/unread_messages.html', {'unread_messages': unread_messages})
