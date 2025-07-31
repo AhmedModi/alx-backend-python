@@ -11,3 +11,6 @@ class Message(models.Model):
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver}: {self.content[:20]}"
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(receiver=user, read=False).only('id', 'content', 'timestamp')
