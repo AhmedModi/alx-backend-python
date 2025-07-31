@@ -6,13 +6,8 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    parent_message = models.ForeignKey(
-        'self',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='replies'
-    )
+    read = models.BooleanField(default=False)  # ✅ New field
+    parent_message = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
 
     def __str__(self):
-        return f'{self.sender} -> {self.receiver}: {self.content[:30]}'
+        return f"From {self.sender} to {self.receiver}: {self.content[:20]}"
