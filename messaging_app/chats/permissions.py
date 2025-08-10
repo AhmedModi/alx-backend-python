@@ -1,6 +1,23 @@
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
+class IsOwnerOrParticipant(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        # Determine the conversation object
+        if hasattr(obj, 'participants'):
+            conversation = obj
+        else:
+            conversation = obj.conversation
+
+        # Allow if user is a participant
+        return request.user in conversation.participants.all()
+
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
 class IsParticipantOfConversation(BasePermission):
     def has_object_permission(self, request, view, obj):
         if not request.user or not request.user.is_authenticated:
