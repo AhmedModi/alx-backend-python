@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build: .
@@ -5,8 +7,43 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
     environment:
-      - DEBUG=1
-      - DJANGO_SETTINGS_MODULE=messaging_app.settings
-    command: python messaging_app/manage.py runserver 0.0.0.0:8000
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DB_ENGINE=${DB_ENGINE}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+    depends_on:
+      - db
     restart: unless-stopped
+    networks:
+      - messaging_network
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - messaging_network
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data:
+  static_volume:
+
+networks:
+  messaging_network:
+    driver: bridge

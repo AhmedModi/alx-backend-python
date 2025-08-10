@@ -27,7 +27,7 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Collect static files
-RUN python messaging_app/manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000
