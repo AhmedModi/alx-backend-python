@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+DEPLOYMENT_NAME="messaging-app-deployment"
+SERVICE_NAME="messaging-app-service"
+NAMESPACE="default"
+
+echo "📦 Scaling $DEPLOYMENT_NAME to 3 replicas..."
+kubectl scale deployment "$DEPLOYMENT_NAME" --replicas=3 --namespace="$NAMESPACE"
+
+echo "✅ Scaling complete. Checking pods..."
+kubectl get pods --namespace="$NAMESPACE"
+
+echo "📊 Monitoring resource usage..."
+kubectl top pods --namespace="$NAMESPACE" || echo "⚠️ Metrics server may not be installed."
+
+# Get ClusterIP and Port for load testing
+CLUSTER_IP=$(kubectl get svc "$SERVICE_NAME" --namespace="$NAMESPACE" -o jsonpath='{.spec.clusterIP}')
+PORT=$(kubectl get svc "$SERVICE_NAME" --namespace="$NAMESPACE" -o jsonpath='{.spec.ports[0].port}')
+
+if command -v wrk &> /dev/null; then
+    echo "🚀 Running load test with wrk..."
+    wrk -t2 -c50 -d30s http://$CLUSTER_IP:$PORT/
+else
+    echo "⚠️ wrk is not installed. Skipping load test."
+fi
