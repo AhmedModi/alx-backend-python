@@ -1,0 +1,26 @@
+#!/bin/bash
+
+echo "Starting rolling update for messaging-app-blue..."
+
+# Apply the updated deployment
+kubectl apply -f blue_deployment.yaml
+
+# Monitor rollout status
+kubectl rollout status deployment/messaging-app-blue
+
+# Test for downtime during rollout
+echo "Testing app availability during rollout..."
+for i in {1..20}
+do
+    curl -s http://<YOUR_CLUSTER_IP>:8000/ > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Request $i failed — possible downtime detected."
+    else
+        echo "Request $i successful."
+    fi
+    sleep 1
+done
+
+# Verify pods after update
+echo "Current pods after update:"
+kubectl get pods -l app=messaging-app,version=blue -o wide
