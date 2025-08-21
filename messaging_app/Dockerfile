@@ -17,20 +17,17 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
-COPY . .
+# Copy project files
+COPY . /app/
 
-# Set Python path to include the current directory
-ENV PYTHONPATH=/app
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Collect static files (safe even if not needed)
+RUN python manage.py collectstatic --noinput || true
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
+# Start Django app with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "messaging_app.wsgi:application"]
