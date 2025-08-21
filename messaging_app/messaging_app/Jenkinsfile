@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "ahmedmodi/messaging_app:latest"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -23,6 +27,24 @@ pipeline {
             post {
                 always {
                     junit 'report.xml'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t $DOCKER_IMAGE messaging_app/"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                        sh "docker push $DOCKER_IMAGE"
+                    }
                 }
             }
         }
