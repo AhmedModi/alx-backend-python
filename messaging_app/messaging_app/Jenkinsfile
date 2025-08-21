@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "messaging_app"
+        IMAGE_TAG = "latest"
+        CONTAINER_PORT = "8000"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run tests inside a temporary container
+                    sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python manage.py test"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Stop existing container if running
+                    sh "docker stop ${IMAGE_NAME} || true && docker rm ${IMAGE_NAME} || true"
+
+                    // Run new container
+                    sh "docker run -d -p 8000:8000 --name ${IMAGE_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+}
